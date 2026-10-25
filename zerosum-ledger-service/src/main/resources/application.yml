@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: zerosum-ledger-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/zerosum_ledger
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  threads:
+    virtual:
+      enabled: true
