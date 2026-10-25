@@ -1,4 +1,4 @@
-package dev.zen.zerosum.ledger.domain;
+package dev.zen.zerosum.ledger.enums;
 
 /** Should match the CHECK constraint on accounts.type in V1__accounts_and_journal.sql. */
 public enum AccountType {

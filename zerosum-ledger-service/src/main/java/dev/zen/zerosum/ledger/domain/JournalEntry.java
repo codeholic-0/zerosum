@@ -1,5 +1,6 @@
 package dev.zen.zerosum.ledger.domain;
 
+import dev.zen.zerosum.ledger.enums.Direction;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.Objects;

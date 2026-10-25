@@ -1,4 +1,4 @@
-package dev.zen.zerosum.ledger.domain;
+package dev.zen.zerosum.ledger.enums;
 
 /** Side of a journal entry. Balance convention: credits minus debits. */
 public enum Direction {
