@@ -13,7 +13,7 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     /** Credits minus debits for one account, in minor units. 0 if it has no entries. */
     @Query(
             """
-        select coalesce(sum(case when e.direction = dev.zen.zerosum.ledger.domain.Direction.CREDIT
+        select coalesce(sum(case when e.direction = dev.zen.zerosum.ledger.enums.Direction.CREDIT
                                  then e.amountMinor else -e.amountMinor end), 0L)
         from JournalEntry e
         where e.accountId = :accountId
@@ -24,7 +24,7 @@ public interface JournalEntryRepository extends JpaRepository<JournalEntry, Long
     @Query(
             """
         select e.currency as currency,
-               sum(case when e.direction = dev.zen.zerosum.ledger.domain.Direction.CREDIT
+               sum(case when e.direction = dev.zen.zerosum.ledger.enums.Direction.CREDIT
                         then e.amountMinor else -e.amountMinor end) as total
         from JournalEntry e
         group by e.currency
