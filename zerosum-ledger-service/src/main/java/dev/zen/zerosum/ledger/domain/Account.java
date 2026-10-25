@@ -55,6 +55,10 @@ public class Account implements Persistable<UUID> {
         return new Account(code, name, currency, type);
     }
 
+    public Currency getCurrency() {
+        return Currency.getInstance(currency);
+    }
+
     @PostLoad
     @PostPersist
     void markNotNew() {

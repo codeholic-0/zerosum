@@ -47,6 +47,10 @@ public class Transfer implements Persistable<UUID> {
         return new Transfer(reference, description, currency);
     }
 
+    public Currency getCurrency() {
+        return Currency.getInstance(currency);
+    }
+
     @Override
     public @Nullable UUID getId() {
         return null;
