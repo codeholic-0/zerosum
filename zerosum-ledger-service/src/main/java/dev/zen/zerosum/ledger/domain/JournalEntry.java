@@ -63,4 +63,8 @@ public class JournalEntry {
     public long signedAmountMinor() {
         return direction.sign() * amountMinor;
     }
+
+    public Money getAmount() {
+        return Money.of(amountMinor, currency);
+    }
 }

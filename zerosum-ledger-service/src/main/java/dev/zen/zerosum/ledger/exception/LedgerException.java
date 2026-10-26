@@ -7,7 +7,8 @@ public abstract sealed class LedgerException extends RuntimeException
         permits LedgerException.InvalidTransfer,
                 LedgerException.UnbalancedTransfer,
                 LedgerException.AccountNotFound,
-                LedgerException.CurrencyMismatch {
+                LedgerException.CurrencyMismatch,
+                LedgerException.InvalidInput {
 
     protected LedgerException(String message) {
         super(message);
@@ -37,6 +38,13 @@ public abstract sealed class LedgerException extends RuntimeException
     /** A leg or account currency differs from the transfer currency. */
     public static final class CurrencyMismatch extends LedgerException {
         public CurrencyMismatch(String message) {
+            super(message);
+        }
+    }
+
+    /** Well-formed input that is not a valid value, e.g. an unknown currency code. */
+    public static final class InvalidInput extends LedgerException {
+        public InvalidInput(String message) {
             super(message);
         }
     }
