@@ -53,12 +53,12 @@ public class Transfer implements Persistable<UUID> {
 
     @Override
     public @Nullable UUID getId() {
-        return null;
+        return this.id;
     }
 
     @Override
     public boolean isNew() {
-        return false;
+        return this.newEntity;
     }
 
     @PostLoad

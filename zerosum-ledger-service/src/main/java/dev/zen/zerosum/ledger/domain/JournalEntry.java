@@ -59,4 +59,8 @@ public class JournalEntry {
             UUID transferId, UUID accountId, Direction direction, Money amount) {
         return new JournalEntry(transferId, accountId, direction, amount);
     }
+
+    public long signedAmountMinor() {
+        return direction.sign() * amountMinor;
+    }
 }
