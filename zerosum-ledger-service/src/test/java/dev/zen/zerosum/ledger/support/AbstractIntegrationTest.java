@@ -1,5 +1,9 @@
 package dev.zen.zerosum.ledger.support;
 
+import dev.zen.zerosum.ledger.domain.Account;
+import dev.zen.zerosum.ledger.enums.AccountType;
+import dev.zen.zerosum.ledger.repositories.AccountRepository;
+import java.util.Currency;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +30,16 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Autowired protected JdbcTemplate jdbc;
+    @Autowired protected AccountRepository accountRepository;
+
+    protected Account newAccount(String code, String currency, AccountType type) {
+        return accountRepository.save(
+                Account.open(code, code + " account", Currency.getInstance(currency), type));
+    }
+
+    protected long count(String table) {
+        return jdbc.queryForObject("select count(*) from " + table, Long.class);
+    }
 
     @BeforeEach
     protected void resetDatabase() {
