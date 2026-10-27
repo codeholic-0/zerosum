@@ -7,7 +7,11 @@ public abstract sealed class LedgerException extends RuntimeException
         permits LedgerException.InvalidTransfer,
                 LedgerException.UnbalancedTransfer,
                 LedgerException.AccountNotFound,
-                LedgerException.CurrencyMismatch {
+                LedgerException.CurrencyMismatch,
+                LedgerException.InvalidInput,
+                LedgerException.DuplicateAccount,
+                LedgerException.IdempotencyConflict,
+                LedgerException.TransferNotFound {
 
     protected LedgerException(String message) {
         super(message);
@@ -38,6 +42,34 @@ public abstract sealed class LedgerException extends RuntimeException
     public static final class CurrencyMismatch extends LedgerException {
         public CurrencyMismatch(String message) {
             super(message);
+        }
+    }
+
+    /** Well-formed input that is not a valid value, e.g. an unknown currency code. */
+    public static final class InvalidInput extends LedgerException {
+        public InvalidInput(String message) {
+            super(message);
+        }
+    }
+
+    /** An account with this code already exists. */
+    public static final class DuplicateAccount extends LedgerException {
+        public DuplicateAccount(String code) {
+            super("An account with code '" + code + "' already exists");
+        }
+    }
+
+    /** An idempotency key was reused with a different request. */
+    public static final class IdempotencyConflict extends LedgerException {
+        public IdempotencyConflict(String key) {
+            super("Idempotency key '" + key + "' was already used with a different request");
+        }
+    }
+
+    /** No transfer exists with the requested id. */
+    public static final class TransferNotFound extends LedgerException {
+        public TransferNotFound(java.util.UUID id) {
+            super("Unknown transfer: " + id);
         }
     }
 }

@@ -52,6 +52,13 @@ public class TransferService {
         return new PostedTransfer(transfer, posted);
     }
 
+    @Transactional(readOnly = true)
+    public PostedTransfer get(UUID id) {
+        Transfer transfer =
+                transfers.findById(id).orElseThrow(() -> new LedgerException.TransferNotFound(id));
+        return new PostedTransfer(transfer, entries.findByTransferIdOrderByIdAsc(id));
+    }
+
     private void validateShape(PostTransferCommand command) {
         List<PostTransferCommand.Leg> legs = command.legs();
 
