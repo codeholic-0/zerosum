@@ -8,7 +8,8 @@ public abstract sealed class LedgerException extends RuntimeException
                 LedgerException.UnbalancedTransfer,
                 LedgerException.AccountNotFound,
                 LedgerException.CurrencyMismatch,
-                LedgerException.InvalidInput {
+                LedgerException.InvalidInput,
+                LedgerException.DuplicateAccount {
 
     protected LedgerException(String message) {
         super(message);
@@ -46,6 +47,13 @@ public abstract sealed class LedgerException extends RuntimeException
     public static final class InvalidInput extends LedgerException {
         public InvalidInput(String message) {
             super(message);
+        }
+    }
+
+    /** An account with this code already exists. */
+    public static final class DuplicateAccount extends LedgerException {
+        public DuplicateAccount(String code) {
+            super("An account with code '" + code + "' already exists");
         }
     }
 }

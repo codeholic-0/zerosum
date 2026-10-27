@@ -34,6 +34,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                     problem(422, "invalid-transfer", "Invalid transfer", e);
             case LedgerException.InvalidInput e ->
                     problem(422, "invalid-input", "Invalid input", e);
+            case LedgerException.DuplicateAccount e ->
+                    problem(409, "duplicate-account", "Account already exists", e);
         };
     }
 
