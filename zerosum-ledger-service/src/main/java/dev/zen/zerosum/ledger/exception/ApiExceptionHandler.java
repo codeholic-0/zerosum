@@ -36,6 +36,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                     problem(422, "invalid-input", "Invalid input", e);
             case LedgerException.DuplicateAccount e ->
                     problem(409, "duplicate-account", "Account already exists", e);
+            case LedgerException.IdempotencyConflict e ->
+                    problem(409, "idempotency-key-reuse", "Idempotency key reused", e);
         };
     }
 

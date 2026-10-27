@@ -9,7 +9,8 @@ public abstract sealed class LedgerException extends RuntimeException
                 LedgerException.AccountNotFound,
                 LedgerException.CurrencyMismatch,
                 LedgerException.InvalidInput,
-                LedgerException.DuplicateAccount {
+                LedgerException.DuplicateAccount,
+                LedgerException.IdempotencyConflict {
 
     protected LedgerException(String message) {
         super(message);
@@ -54,6 +55,13 @@ public abstract sealed class LedgerException extends RuntimeException
     public static final class DuplicateAccount extends LedgerException {
         public DuplicateAccount(String code) {
             super("An account with code '" + code + "' already exists");
+        }
+    }
+
+    /** An idempotency key was reused with a different request. */
+    public static final class IdempotencyConflict extends LedgerException {
+        public IdempotencyConflict(String key) {
+            super("Idempotency key '" + key + "' was already used with a different request");
         }
     }
 }

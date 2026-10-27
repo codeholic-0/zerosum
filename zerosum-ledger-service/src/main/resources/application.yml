@@ -12,3 +12,6 @@ spring:
   threads:
     virtual:
       enabled: true
+zerosum:
+  idempotency:
+    ttl: 24h
