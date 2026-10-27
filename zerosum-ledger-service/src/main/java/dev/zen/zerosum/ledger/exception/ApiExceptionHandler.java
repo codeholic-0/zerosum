@@ -38,6 +38,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                     problem(409, "duplicate-account", "Account already exists", e);
             case LedgerException.IdempotencyConflict e ->
                     problem(409, "idempotency-key-reuse", "Idempotency key reused", e);
+            case LedgerException.TransferNotFound e ->
+                    problem(404, "transfer-not-found", "Transfer not found", e);
         };
     }
 

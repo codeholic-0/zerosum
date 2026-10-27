@@ -10,7 +10,8 @@ public abstract sealed class LedgerException extends RuntimeException
                 LedgerException.CurrencyMismatch,
                 LedgerException.InvalidInput,
                 LedgerException.DuplicateAccount,
-                LedgerException.IdempotencyConflict {
+                LedgerException.IdempotencyConflict,
+                LedgerException.TransferNotFound {
 
     protected LedgerException(String message) {
         super(message);
@@ -62,6 +63,13 @@ public abstract sealed class LedgerException extends RuntimeException
     public static final class IdempotencyConflict extends LedgerException {
         public IdempotencyConflict(String key) {
             super("Idempotency key '" + key + "' was already used with a different request");
+        }
+    }
+
+    /** No transfer exists with the requested id. */
+    public static final class TransferNotFound extends LedgerException {
+        public TransferNotFound(java.util.UUID id) {
+            super("Unknown transfer: " + id);
         }
     }
 }
