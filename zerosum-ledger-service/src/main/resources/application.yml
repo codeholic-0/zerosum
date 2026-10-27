@@ -15,3 +15,6 @@ spring:
 zerosum:
   idempotency:
     ttl: 24h
+    cleanup_interval: PT1H
+    cleanup_initial_delay: PT1M
+    cleanup_batch_size: 1000

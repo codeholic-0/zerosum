@@ -7,6 +7,12 @@ import dev.zen.zerosum.ledger.service.IdempotencyService;
 import dev.zen.zerosum.ledger.service.PostTransferCommand;
 import dev.zen.zerosum.ledger.service.PostedTransfer;
 import dev.zen.zerosum.ledger.service.TransferService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.headers.Header;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.UUID;
@@ -14,6 +20,7 @@ import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,9 +41,50 @@ public class TransferController {
     private final IdempotencyService idempotencyService;
     private final ObjectMapper objectMapper;
 
+    @Operation(
+            summary = "Post a transfer",
+            description =
+                    "Idempotent: retrying with the same Idempotency-Key and the same body returns"
+                            + " the original response and posts nothing.")
+    @ApiResponse(
+            responseCode = "201",
+            description =
+                    "Transfer posted, or the stored response of an identical earlier request"
+                            + " (then Idempotent-Replayed is true)",
+            headers =
+                    @Header(
+                            name = "Idempotent-Replayed",
+                            description = "true when this response is a replay",
+                            schema = @Schema(type = "string")),
+            content =
+                    @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = TransferResponse.class)))
+    @ApiResponse(
+            responseCode = "409",
+            description = "Idempotency key already used with a different request",
+            content =
+                    @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
+    @ApiResponse(
+            responseCode = "422",
+            description =
+                    "Well-formed but breaks a ledger rule (unbalanced, unknown account, currency"
+                            + " mismatch, ...)",
+            content =
+                    @Content(
+                            mediaType = "application/problem+json",
+                            schema = @Schema(implementation = ProblemDetail.class)))
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> create(
-            @RequestHeader("Idempotency-Key") String key,
+            @Parameter(
+                            description =
+                                    "Unique per logical request; a UUID is recommended."
+                                            + " 1-255 printable ASCII characters, no spaces.",
+                            example = "7d0f6c0e-5a64-4a52-9a41-3f1b2b9a6c11")
+                    @RequestHeader("Idempotency-Key")
+                    String key,
             @Valid @RequestBody TransferRequest request) {
         if (!KEY_FORMAT.matcher(key).matches()) {
             throw new ResponseStatusException(
