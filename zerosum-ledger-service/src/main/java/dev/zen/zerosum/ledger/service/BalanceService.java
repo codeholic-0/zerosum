@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,8 +20,12 @@ public class BalanceService {
 
     private final AccountRepository accounts;
     private final JournalEntryRepository entries;
+    private final JdbcClient jdbc;
 
-    /** Balance = credits minus debits, derived from journal entries */
+    /**
+     * Balance = credits minus debits. Constrained accounts read their maintained balance (one row
+     * lookup); unconstrained accounts derive it from the journal entries.
+     */
     @Transactional(readOnly = true)
     public Money balanceOf(UUID accountId) {
         var account =
@@ -29,7 +34,16 @@ public class BalanceService {
                                 () ->
                                         new LedgerException.AccountNotFound(
                                                 "Unknown account: " + accountId));
-        return new Money(entries.balanceMinor(accountId), account.getCurrency());
+        long minor =
+                account.getMinBalanceMinor() != null
+                        ? jdbc.sql(
+                                        "select balance_minor from account_balances"
+                                                + " where account_id = :id")
+                                .param("id", accountId)
+                                .query(Long.class)
+                                .single()
+                        : entries.balanceMinor(accountId);
+        return new Money(minor, account.getCurrency());
     }
 
     /** Integrity check: in a healthy ledger every currency nets to exactly zero. */
