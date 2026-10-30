@@ -53,7 +53,7 @@ public abstract class AbstractIntegrationTest {
     @BeforeEach
     protected void resetDatabase() {
         jdbc.execute(
-                "TRUNCATE journal_entries, transfers, accounts, idempotency_keys, account_balances"
-                        + " RESTART IDENTITY");
+                "TRUNCATE journal_entries, transfers, accounts, idempotency_keys, account_balances,"
+                        + " outbox RESTART IDENTITY");
     }
 }
