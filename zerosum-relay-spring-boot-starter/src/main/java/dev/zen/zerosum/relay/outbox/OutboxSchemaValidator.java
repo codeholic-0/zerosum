@@ -27,7 +27,7 @@ public class OutboxSchemaValidator implements SmartInitializingSingleton {
         EXPECTED_COLUMNS.put("created_at", "timestamp with time zone");
     }
 
-    static final String EXPECTED_DDL =
+    public static final String EXPECTED_DDL =
             """
         CREATE TABLE outbox (
             id             UUID        PRIMARY KEY,

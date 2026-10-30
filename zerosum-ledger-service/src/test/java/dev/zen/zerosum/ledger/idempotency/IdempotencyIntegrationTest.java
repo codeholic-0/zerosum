@@ -51,6 +51,7 @@ class IdempotencyIntegrationTest extends AbstractApiIntegrationTest {
                 .isEqualTo(read(first, TransferResponse.class));
         assertThat(count("transfers")).isEqualTo(1);
         assertThat(count("journal_entries")).isEqualTo(2);
+        assertThat(count("outbox")).as("a replay writes no second event").isEqualTo(1);
     }
 
     @Test
@@ -110,6 +111,7 @@ class IdempotencyIntegrationTest extends AbstractApiIntegrationTest {
         assertThat(corrected.status()).isEqualTo(201);
         assertThat(corrected.header("Idempotent-Replayed")).isNull();
         assertThat(count("transfers")).isEqualTo(1);
+        assertThat(count("outbox")).as("only the corrected request left an event").isEqualTo(1);
     }
 
     @Test
@@ -153,6 +155,7 @@ class IdempotencyIntegrationTest extends AbstractApiIntegrationTest {
         assertThat(count("transfers")).isEqualTo(1);
         assertThat(count("journal_entries")).isEqualTo(2);
         assertThat(count("idempotency_keys")).isEqualTo(1);
+        assertThat(count("outbox")).as("one event for 20 identical requests").isEqualTo(1);
     }
 
     @Test

@@ -98,7 +98,9 @@ class ConcurrentTransfersStressIntegrationTest extends AbstractIntegrationTest {
         assertThat(rejected.get()).as("the limits must actually have been hit").isPositive();
         assertThat(committed.get()).isPositive();
         assertThat(count("transfers")).isEqualTo(WALLETS + committed.get());
-
+        assertThat(count("outbox"))
+                .as("exactly one event per committed transfer, none for rejected ones")
+                .isEqualTo(count("transfers"));
         // 2. No limit violated, no lost update: the maintained balance, the balance derived from
         //    entries and the test's own model all agree.
         for (int i = 0; i < WALLETS; i++) {
