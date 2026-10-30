@@ -11,7 +11,8 @@ public abstract sealed class LedgerException extends RuntimeException
                 LedgerException.InvalidInput,
                 LedgerException.DuplicateAccount,
                 LedgerException.IdempotencyConflict,
-                LedgerException.TransferNotFound {
+                LedgerException.TransferNotFound,
+                LedgerException.InsufficientFunds {
 
     protected LedgerException(String message) {
         super(message);
@@ -70,6 +71,13 @@ public abstract sealed class LedgerException extends RuntimeException
     public static final class TransferNotFound extends LedgerException {
         public TransferNotFound(java.util.UUID id) {
             super("Unknown transfer: " + id);
+        }
+    }
+
+    /** The transfer would push a constrained account below its minimum balance. */
+    public static final class InsufficientFunds extends LedgerException {
+        public InsufficientFunds(String accountCode) {
+            super("Insufficient funds: account '" + accountCode + "' cannot go below its limit");
         }
     }
 }

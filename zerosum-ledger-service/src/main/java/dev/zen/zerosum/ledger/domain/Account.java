@@ -1,6 +1,7 @@
 package dev.zen.zerosum.ledger.domain;
 
 import dev.zen.zerosum.ledger.enums.AccountType;
+import dev.zen.zerosum.ledger.exception.LedgerException;
 import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.Currency;
@@ -35,6 +36,9 @@ public class Account implements Persistable<UUID> {
     @Column(nullable = false)
     private AccountType type;
 
+    @Column(name = "min_balance_minor")
+    private Long minBalanceMinor;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -42,17 +46,32 @@ public class Account implements Persistable<UUID> {
 
     protected Account() {}
 
-    private Account(String code, String name, Currency currency, AccountType type) {
+    private Account(
+            String code, String name, Currency currency, AccountType type, Long minBalanceMinor) {
+        if (minBalanceMinor != null && minBalanceMinor > 0) {
+            throw new LedgerException.InvalidInput(
+                    "minBalanceMinor must be zero or negative: " + minBalanceMinor);
+        }
         this.id = UUID.randomUUID();
         this.code = Objects.requireNonNull(code, "code");
         this.name = Objects.requireNonNull(name, "name");
         this.currency = Objects.requireNonNull(currency, "currency").getCurrencyCode();
         this.type = Objects.requireNonNull(type, "type");
+        this.minBalanceMinor = minBalanceMinor;
         this.createdAt = Instant.now();
     }
 
+    /** An unconstrained account: no balance limit, and its balance is never locked. */
     public static Account open(String code, String name, Currency currency, AccountType type) {
-        return new Account(code, name, currency, type);
+        return open(code, name, currency, type, null);
+    }
+
+    /**
+     * minBalanceMinor is the lowest allowed signed balance (zero or negative), or null for none.
+     */
+    public static Account open(
+            String code, String name, Currency currency, AccountType type, Long minBalanceMinor) {
+        return new Account(code, name, currency, type, minBalanceMinor);
     }
 
     public Currency getCurrency() {

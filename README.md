@@ -19,7 +19,7 @@ set -a; source deploy/.env; set +a
 `zerosum-ledger-service` is the double-entry core: accounts, immutable journal entries and
 balanced transfers on PostgreSQL.
 
-### Tests
+### Tests managed by AI @Claude
 
 Tests need Docker: Testcontainers starts a throwaway `postgres:17`.
 - JaCoCo enforces at least 80% line coverage on the module.
@@ -30,6 +30,21 @@ Tests need Docker: Testcontainers starts a throwaway `postgres:17`.
 ```bash
 ./mvnw -B verify
 ```
+
+### Stress test
+
+`ConcurrentTransfersStressIntegrationTest` runs virtual threads against four constrained wallets
+and two hot unconstrained accounts, with transfers in both directions and withdrawals sized so
+limits are hit. It asserts: no unexpected failure (including deadlocks), no limit violated,
+maintained balance == balance derived from entries == an independent model, and a zero trial
+balance.
+
+```bash
+./mvnw -B -pl zerosum-ledger-service test -Djacoco.skip=true \
+  -Dtest=ConcurrentTransfersStressIntegrationTest \
+  -Dzerosum.stress.transfers=20000 -Dzerosum.stress.concurrency=16
+```
+
 ## API
 
 Interactive docs: <http://localhost:8080/swagger-ui.html> (raw spec at `/v3/api-docs`).
@@ -37,7 +52,7 @@ Amounts are integer minor units, and every error is an RFC 9457 problem-details 
 
 | Method and path | Purpose |
 |---|---|
-| `POST /accounts` | Create an account (409 if the code exists) |
+| `POST /accounts` | Create an account, optionally with `minBalanceMinor` (409 if the code exists) |
 | `GET /accounts/{id}` | Read an account |
 | `GET /accounts/{id}/balance` | Balance in minor units (credits minus debits) |
 | `POST /transfers` | Post a transfer; requires `Idempotency-Key` |
@@ -53,6 +68,19 @@ Amounts are integer minor units, and every error is an RFC 9457 problem-details 
 - Identical requests arriving at the same time: exactly one posts; the rest get the same response.
 - A failed request (for example an unbalanced one) does not consume the key.
 - Keys expire after 24 hours (`zerosum.idempotency.ttl`).
+
+## Balance limits and concurrency
+
+An account may declare `minBalanceMinor` (zero or negative): the lowest balance it may reach.
+
+- **Enforced atomically.** A constrained account has a maintained balance row, and each transfer
+  applies one conditional `UPDATE ... WHERE balance + delta >= limit`. There is no read followed
+  by a write, so concurrent transfers cannot jointly break a limit. A violating transfer returns
+  `422 insufficient-funds`, writes nothing and does not consume its idempotency key.
+- **Database-backed.** `CHECK` constraints stop even raw SQL from crossing a limit.
+- **No deadlocks.** Balance rows are always updated in ascending account-id order.
+- **Hot accounts stay fast.** Accounts without a limit are never locked and have no balance row.
+
 
 ```bash
 curl -si -X POST localhost:8080/transfers \

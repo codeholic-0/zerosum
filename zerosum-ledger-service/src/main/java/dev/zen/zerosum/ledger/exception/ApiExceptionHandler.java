@@ -40,6 +40,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                     problem(409, "idempotency-key-reuse", "Idempotency key reused", e);
             case LedgerException.TransferNotFound e ->
                     problem(404, "transfer-not-found", "Transfer not found", e);
+            case LedgerException.InsufficientFunds e ->
+                    problem(422, "insufficient-funds", "Insufficient funds", e);
         };
     }
 
