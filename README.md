@@ -19,7 +19,7 @@ set -a; source deploy/.env; set +a
 `zerosum-ledger-service` is the double-entry core: accounts, immutable journal entries and
 balanced transfers on PostgreSQL.
 
-### Tests
+### Tests managed by AI @Claude
 
 Tests need Docker: Testcontainers starts a throwaway `postgres:17`.
 - JaCoCo enforces at least 80% line coverage on the module.
