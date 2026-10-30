@@ -30,7 +30,8 @@ public class AccountController {
                         request.code(),
                         request.name(),
                         Currencies.parse(request.currency()),
-                        request.type());
+                        request.type(),
+                        request.minBalanceMinor());
         URI location =
                 ServletUriComponentsBuilder.fromCurrentRequest()
                         .path("/{id}")
