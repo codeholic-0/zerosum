@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: zerosum-ledger-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/zerosum_ledger
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  threads:
+    virtual:
+      enabled: true
+zerosum:
+  idempotency:
+    ttl: 24h
+    cleanup_interval: PT1H
+    cleanup_initial_delay: PT1M
+    cleanup_batch_size: 1000

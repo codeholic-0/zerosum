@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: zerosum-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-zerosum}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-zerosum}
+      POSTGRES_DB: zerosum_ledger
+      TZ: UTC
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - zerosum-pgdata:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro,z
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-zerosum} -d zerosum_ledger"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  zerosum-pgdata:
