@@ -5,10 +5,12 @@ import dev.zen.zerosum.ledger.domain.JournalEntry;
 import dev.zen.zerosum.ledger.domain.Money;
 import dev.zen.zerosum.ledger.domain.Transfer;
 import dev.zen.zerosum.ledger.enums.Direction;
+import dev.zen.zerosum.ledger.events.TransferCompleted;
 import dev.zen.zerosum.ledger.exception.LedgerException;
 import dev.zen.zerosum.ledger.repositories.AccountRepository;
 import dev.zen.zerosum.ledger.repositories.JournalEntryRepository;
 import dev.zen.zerosum.ledger.repositories.TransferRepository;
+import dev.zen.zerosum.relay.outbox.OutboxPublisher;
 import jakarta.persistence.EntityManager;
 import java.util.*;
 import java.util.function.Function;
@@ -27,6 +29,7 @@ public class TransferService {
     private final JournalEntryRepository entries;
     private final EntityManager entityManager;
     private final JdbcClient jdbc;
+    private final OutboxPublisher outbox;
 
     @Transactional
     public PostedTransfer post(PostTransferCommand command) {
@@ -51,7 +54,7 @@ public class TransferService {
                                                         leg.direction(),
                                                         leg.amount()))
                                 .toList());
-
+        outbox.publish(TransferCompleted.from(transfer, posted).toOutboxEvent());
         // Last on purpose: balance rows are the only contended rows, and a row lock is held until
         // commit, so take them as late as possible.
         applyBalanceLimits(command, involved);
