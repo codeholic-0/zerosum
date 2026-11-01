@@ -15,9 +15,21 @@ set -a; source deploy/.env; set +a
 ```
 
 ## Ledger core
-
 `zerosum-ledger-service` is the double-entry core: accounts, immutable journal entries and
 balanced transfers on PostgreSQL.
+
+# Zerosum Relay Starter
+- Transactional outbox for Spring Boot: record an event in the same database transaction as your
+  data, so the event exists if and only if the data commits. Delivery to Kafka (via Debezium) comes
+  in a later milestone; this module is the recording side.
+
+- Works as a dependency for zerosum-ledger-service
+## Properties
+
+| Property | Default | Effect |
+|---|---|---|
+| `relay.outbox.enabled` | `true` | `false` removes the publisher and the startup check entirely |
+| `relay.outbox.validate-schema` | `true` | `false` keeps the publisher but skips the startup table check |
 
 ### Tests managed by AI @Claude
 
